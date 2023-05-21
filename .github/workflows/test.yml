@@ -34,7 +34,6 @@ jobs:
     - uses: actions/setup-go@v4
       with:
         go-version: ${{ matrix.go-version }}
-        cache: false
     # linux already runs the tests with -race below, plus extra checks,
     # so skip the regular tests to prevent it from taking the longest.
     - if: matrix.os != 'ubuntu-latest'
@@ -79,17 +78,18 @@ jobs:
     env:
       GOARCH: 386
     steps:
-    - uses: actions/setup-go@v3
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v4
       with:
         go-version: 1.20.x
-    - uses: actions/checkout@v3
-    - name: Test
-      run: go test -timeout=15m ./...
+        cache: false
+    - run: go test -short ./...
 
   test-gotip:
     runs-on: ubuntu-latest
     steps:
-    - name: Install Go
+    - uses: actions/checkout@v3
+    - name: Build Go tip
       env:
         GO_COMMIT: aeb0644bd33e67f24e2411a651ac9ff72ddc96b4 # 2023-05-19
       run: |
@@ -105,6 +105,5 @@ jobs:
         ./make.bash
         echo "GOROOT=$HOME/gotip" >>$GITHUB_ENV
         echo "$HOME/gotip/bin" >>$GITHUB_PATH
-    - uses: actions/checkout@v3
-    - name: Test
-      run: go test -timeout=15m ./...
+    - run: go env
+    - run: go test -short ./...
